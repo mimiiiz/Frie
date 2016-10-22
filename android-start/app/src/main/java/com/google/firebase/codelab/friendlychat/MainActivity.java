@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private static final String TAG = "MainActivity";
-    public static final String MESSAGES_CHILD = "messages";
+    public static final String MESSAGES_CHILD = "mimi";
     private static final int REQUEST_INVITE = 1;
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
     public static final String ANONYMOUS = "anonymous";
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
+    private DatabaseReference mDatabase;
 
     // Firebase instance variables
 
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
-//        mUsername = ANONYMOUS;
+        mUsername = ANONYMOUS;
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
@@ -131,51 +132,51 @@ public class MainActivity extends AppCompatActivity
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
-
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 //        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
         // New child entries
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage,
-                MessageViewHolder>(
-                FriendlyMessage.class,
-                R.layout.item_message,
-                MessageViewHolder.class,
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
-                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                viewHolder.messageTextView.setText(friendlyMessage.getText());
-                viewHolder.messengerTextView.setText(friendlyMessage.getName());
-                if (friendlyMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView
-                            .setImageDrawable(ContextCompat
-                                    .getDrawable(MainActivity.this,
-                                            R.drawable.ic_account_circle_black_36dp));
-                } else {
-                    Glide.with(MainActivity.this)
-                            .load(friendlyMessage.getPhotoUrl())
-                            .into(viewHolder.messengerImageView);
-                }
-            }
-        };
-
-        mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                int friendlyMessageCount = mFirebaseAdapter.getItemCount();
-                int lastVisiblePosition =
-                        mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded or the
-                // user is at the bottom of the list, scroll to the bottom
-                // of the list to show the newly added message.
-                if (lastVisiblePosition == -1 ||
-                        (positionStart >= (friendlyMessageCount - 1) &&
-                                lastVisiblePosition == (positionStart - 1))) {
-                    mMessageRecyclerView.scrollToPosition(positionStart);
-                }
-            }
-        });
+//        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+//        mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage,
+//                MessageViewHolder>(
+//                FriendlyMessage.class,
+//                R.layout.item_message,
+//                MessageViewHolder.class,
+//                mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
+//            @Override
+//            protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
+//                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+//                viewHolder.messageTextView.setText(friendlyMessage.getText());
+//                viewHolder.messengerTextView.setText(friendlyMessage.getName());
+//                if (friendlyMessage.getPhotoUrl() == null) {
+//                    viewHolder.messengerImageView
+//                            .setImageDrawable(ContextCompat
+//                                    .getDrawable(MainActivity.this,
+//                                            R.drawable.ic_account_circle_black_36dp));
+//                } else {
+//                    Glide.with(MainActivity.this)
+//                            .load(friendlyMessage.getPhotoUrl())
+//                            .into(viewHolder.messengerImageView);
+//                }
+//            }
+//        };
+//
+//        mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+//            @Override
+//            public void onItemRangeInserted(int positionStart, int itemCount) {
+//                super.onItemRangeInserted(positionStart, itemCount);
+//                int friendlyMessageCount = mFirebaseAdapter.getItemCount();
+//                int lastVisiblePosition =
+//                        mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
+//                // If the recycler view is initially being loaded or the
+//                // user is at the bottom of the list, scroll to the bottom
+//                // of the list to show the newly added message.
+//                if (lastVisiblePosition == -1 ||
+//                        (positionStart >= (friendlyMessageCount - 1) &&
+//                                lastVisiblePosition == (positionStart - 1))) {
+//                    mMessageRecyclerView.scrollToPosition(positionStart);
+//                }
+//            }
+//        });
 
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
@@ -204,8 +205,12 @@ public class MainActivity extends AppCompatActivity
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, mPhotoUrl);
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(friendlyMessage);
+//                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, mPhotoUrl);
+//                mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(friendlyMessage);
+
+
+                Review review = new Review(123, mMessageEditText.getText().toString(), 12);
+                mDatabase.child("Reveiw").push().child(mMessageEditText.getText().toString()).setValue(review);
                 mMessageEditText.setText("");
             }
         });
