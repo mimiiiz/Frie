@@ -1,6 +1,9 @@
 package com.google.firebase.codelab.friendlychat;
 
 import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -8,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,6 +20,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback ,ActivityCompat.OnRequestPermissionsResultCallback{
@@ -24,6 +29,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 //    private boolean mPermissionDenied = false;
 
+    LatLng myPosition;
+    LocationManager locationManager;
+    Criteria criteria = new Criteria();
+    String provider ;
+    Location location ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +42,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //for get lat, long
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(criteria, true);
 
     }
 
@@ -59,7 +74,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
+
         }
+        //for get lat, long
+        location = locationManager.getLastKnownLocation(provider);
     }
 
     @Override
@@ -80,6 +98,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
             }
         }
+
         return;
+    }
+
+    public void getLocation(View v){
+
+        if (location != null) {
+            // Getting latitude of the current location
+            double latitude = location.getLatitude();
+
+            // Getting longitude of the current location
+            double longitude = location.getLongitude();
+
+            // Creating a LatLng object for the current location
+            LatLng latLng = new LatLng(latitude, longitude);
+
+            myPosition = new LatLng(latitude, longitude);
+
+            mMap.addMarker(new MarkerOptions().position(myPosition).title("Start"));
+
+            Toast.makeText(this, "Lat " + latitude+ " "+ "Long " + longitude+"" ,Toast.LENGTH_LONG).show();
+        }else {
+            Toast.makeText(this, "null" ,Toast.LENGTH_LONG).show();
+        }
     }
 }
